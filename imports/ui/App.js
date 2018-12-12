@@ -33,7 +33,6 @@ export default class App extends Component {
 
   onMUpdate = snapshot => {
     const docs = snapshot.docs.map(docSnapshot => ({
-      //id: docSnapshot.id,
       data: docSnapshot.data()
     }));
     this.setState({
@@ -73,7 +72,7 @@ export default class App extends Component {
     projectId: Meteor.settings.public.stripe.projectId,
     storageBucket: Meteor.settings.public.stripe.storageBucket,
     messagingSenderId: Meteor.settings.public.stripe.messagingSenderId
-};
+    };
 
     firebase.initializeApp(config);
     const db = firebase.firestore();
@@ -112,7 +111,7 @@ getMeasuresData()
     for(var i = 0; i< medidas.length;i++)
     {
       var d = new Date(medidas[i].data.time_sort).getDay();
-      console.log(d);
+
       if(medidas[i].data.gender==="Male")
       {
           if(d === 0)
@@ -313,12 +312,12 @@ getMeasuresData()
     datasets: [
     {
       label: 'Male',
-      backgroundColor: 'rgba(179,181,198,0.2)',
-      borderColor: 'rgba(179,181,198,1)',
-      pointBackgroundColor: 'rgba(179,181,198,1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgba(179,181,198,1)',
+      backgroundColor: 'rgba(102, 204, 255)',
+      borderColor: 'rgba(0, 51, 153)',
+      pointBackgroundColor: 'rgba(102, 204, 255)',
+      pointBorderColor: 'rgba(0, 51, 153)',
+      pointHoverBackgroundColor: 'rgba(0, 51, 153)',
+      pointHoverBorderColor: 'rgba(0, 51, 153)',
       data: data1
     },
     {
@@ -344,8 +343,6 @@ return (
 
 
 }
-
-
 getSymptomsData(){
 
 
@@ -477,6 +474,7 @@ return (
         <h2>Specialists for Symptoms</h2>
         <HorizontalBar
             data={data2}
+            height={175}
            />
         <br />
         </div>
@@ -491,7 +489,21 @@ return (
     let times = [];
     let min = [];
     let max = [];
+    let prome = [];
+    let mine = [];
+    let maxe = [];
+    let fechas=[];
+    let dates=[];
+    let veces=[];
+    let users = this.state.users;
+    let man = [];
+    let woman = [];
+    //0 H, 1 M
     for (var i = 0; i < time.length; i++) {
+      var date = new Date(time[i].data.date.seconds*1000);
+      let split=date.toString().split(" ");
+      let fecha = split[0];
+      dates.push(fecha);
       let h = time[i].data.hospital;
       var j;
       var encontro = true;
@@ -503,6 +515,33 @@ return (
         times.push(1);
         min.push(tiempo);
         max.push(tiempo);
+        let ta = time[i].data.internistTime.split(":");
+        let tiemp = parseInt(ta[1]) + 60 * parseInt(ta[0]);
+        prome.push(tiemp);
+        mine.push(tiemp);
+        maxe.push(tiemp);
+        /*
+        1. Ver el genero del usuario
+        */
+        let uId=time[i].data.user_id;
+        let user;
+        let end = false;
+        for(var m = 0; m<users.length && !end;m++){
+          let us = users[m].data;
+          if(uId==us.uid){
+            if(us.gender=="Male"){
+              man.push(1);
+              woman.push(0);
+              console.log("hombre");
+            }
+            else{
+              man.push(0);
+              woman.push(1);
+              alert("Mujer");
+            }
+            end =true;
+          }
+        }
       } else {
         for (j = 0; j < hospitals.length && encontro; j++) {
           if (hospitals[j] == h) {
@@ -517,6 +556,35 @@ return (
             if (max[j] < tiempo) {
               max[j] = tiempo;
             }
+            let ta = time[i].data.internistTime.split(":");
+            let tiemp = parseInt(ta[1]) + 60 * parseInt(ta[0]);
+            prome[j] = prome[j] + tiemp;
+            if (mine[j] > tiemp) {
+              mine[j] = tiemp;
+            }
+            if (maxe[j] < tiemp) {
+              maxe[j] = tiemp;
+            }
+            /*
+            1. Ver el genero del usuario
+            */
+            let uId=time[i].data.user_id;
+            let user;
+            let end = false;
+            for(var m = 0; m<users.length && !end;m++){
+              let us = users[m].data;
+              if(uId==us.uid){
+                if(us.gender=="Male"){
+                  man[j]=man[j]+1;
+                  console.log("hombre");
+                }
+                else{
+                  woman[j]=woman[j]+1;
+                  alert("Mujer");
+                }
+                end =true;
+              }
+            }
           } else if (j == hospitals.length - 1 && hospitals[j] != h) {
             hospitals.push(h);
             let t = time[i].data.erTime.split(":");
@@ -525,12 +593,61 @@ return (
             times.push(1);
             min.push(tiempo);
             max.push(tiempo);
+
+            let ta = time[i].data.internistTime.split(":");
+            let tiemp = parseInt(ta[1]) + 60 * parseInt(ta[0]);
+            prome.push(tiemp);
+            mine.push(tiemp);
+            maxe.push(tiemp);
+            /*
+            1. Ver el genero del usuario
+            */
+            let uId=time[i].data.user_id;
+            let end = false;
+            for(var m = 0; m<users.length && !end;m++){
+              let us = users[m].data;
+              if(uId==us.uid){
+                if(us.gender=="Male"){
+                  man.push(1);
+                  woman.push(0);
+                  console.log("hombre");
+                }
+                else{
+                  man.push(0);
+                  woman.push(1);
+                  alert("Mujer");
+                }
+                end =true;
+              }
+            }
+          }
+        }
+      }
+    }
+    for(var i = 0; i < dates.length; i++){
+      let date = dates[i];
+      if(fechas.length==0){
+        fechas.push(date);
+        veces.push(1);
+      }
+      else {
+        let encontro = true;
+        for (j = 0; j < fechas.length && encontro; j++) {
+          if (fechas[j] == date) {
+            encontro = false;
+            veces[j]=veces[j]+1;
+          } else if (j == fechas.length - 1 && fechas[j] != date) {
+            fechas.push(date);
+            veces.push(1);
           }
         }
       }
     }
     for (var i = 0; i < prom.length; i++) {
       prom[i] = prom[i] / times[i];
+    }
+    for (var i = 0; i < prome.length; i++) {
+      prome[i] = prome[i] / times[i];
     }
     let timeD = {
       labels: hospitals,
@@ -564,6 +681,73 @@ return (
         }
       ]
     };
+    let timeInternist = {
+      labels: hospitals,
+      datasets: [
+        {
+          label: "Average ER Waiting Time",
+          backgroundColor: "rgba(0, 153, 255)",
+          borderColor: "rgba(0, 51, 153)",
+          borderWidth: 1,
+          hoverBackgroundColor: "rgba(0, 255, 0)",
+          hoverBorderColor: "rgba(0, 102, 0)",
+          data: prome
+        },
+        {
+          label: "Minimum ER Waiting Time",
+          backgroundColor: "rgba(0, 13, 55)",
+          borderColor: "rgba(0, 51, 53)",
+          borderWidth: 1,
+          hoverBackgroundColor: "rgba(0, 55, 10)",
+          hoverBorderColor: "rgba(0, 12, 20)",
+          data: mine
+        },
+        {
+          label: "Maximum ER Waiting Time",
+          backgroundColor: "rgba(0, 15, 25)",
+          borderColor: "rgba(0, 71, 15)",
+          borderWidth: 1,
+          hoverBackgroundColor: "rgba(0, 25, 50)",
+          hoverBorderColor: "rgba(0, 20, 80)",
+          data: maxe
+        }
+      ]
+    };
+    let generos = {
+      labels: hospitals,
+      datasets: [
+        {
+          label: "Woman",
+          backgroundColor: "rgba(0, 153, 255)",
+          borderColor: "rgba(0, 51, 153)",
+          borderWidth: 1,
+          hoverBackgroundColor: "rgba(0, 255, 0)",
+          hoverBorderColor: "rgba(0, 102, 0)",
+          data: woman
+        },
+        {
+          label: "Man",
+          backgroundColor: "rgba(0, 13, 55)",
+          borderColor: "rgba(0, 51, 53)",
+          borderWidth: 1,
+          hoverBackgroundColor: "rgba(0, 55, 10)",
+          hoverBorderColor: "rgba(0, 12, 20)",
+          data: man
+        }]
+    };
+    let visitas = {
+      labels: fechas,
+      datasets: [
+        {
+          label: "Visits per day",
+          backgroundColor: "rgba(0, 153, 255)",
+          borderColor: "rgba(0, 51, 153)",
+          borderWidth: 1,
+          hoverBackgroundColor: "rgba(0, 255, 0)",
+          hoverBorderColor: "rgba(0, 102, 0)",
+          data: veces
+        }]
+      };
     return (
       <div>
         <br />
@@ -571,6 +755,14 @@ return (
         <h2>Emergency Room Waiting time (triage)</h2>
         <Chart chartData={timeD} />
         <br />
+        <h2>Waiting time for Internist Attention</h2>
+        <Chart chartData={timeInternist} />
+        <br />
+        <h2>Visits per day (All hospitals)</h2>
+        <Chart chartData={visitas} />
+        <br />
+        <h2>Visits per gender</h2>
+        <Chart chartData={generos} />
       </div>
     );
   }
@@ -581,7 +773,6 @@ return (
 
 
     const users = this.state.users;
-    console.log(users);
     let currentUser = null;
     let birthDay = null;
     let age = null;
@@ -670,7 +861,7 @@ for(var i = 0;i<users.length;i++)
       }
       birthDay = this.birthSecondstoDate(currentUser.birth.seconds);
       age = this.calculateAge(birthDay);
-      //console.log(age);
+
       if (age >= 0 && age <= 14) {
         children++;
       }
