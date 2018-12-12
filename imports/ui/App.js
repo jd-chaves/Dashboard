@@ -772,7 +772,7 @@ getUserM(){
   for(var i=0; i<users.length;i++){
     let user = users[i].data;
     if(user.weight && user.height){
-      let masa = user.weight/(user.height*user.height);
+      let masa = user.weight/((user.height/100)*(user.height/100));
       if(por.length==0){
         por.push(masa);
         times.push(1);
