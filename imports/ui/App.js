@@ -532,12 +532,10 @@ return (
             if(us.gender=="Male"){
               man.push(1);
               woman.push(0);
-              console.log("hombre");
-            }
+                          }
             else{
               man.push(0);
               woman.push(1);
-              alert("Mujer");
             }
             end =true;
           }
@@ -576,11 +574,11 @@ return (
               if(uId==us.uid){
                 if(us.gender=="Male"){
                   man[j]=man[j]+1;
-                  console.log("hombre");
+
                 }
                 else{
                   woman[j]=woman[j]+1;
-                  alert("Mujer");
+
                 }
                 end =true;
               }
@@ -610,12 +608,12 @@ return (
                 if(us.gender=="Male"){
                   man.push(1);
                   woman.push(0);
-                  console.log("hombre");
+
                 }
                 else{
                   man.push(0);
                   woman.push(1);
-                  alert("Mujer");
+
                 }
                 end =true;
               }
@@ -767,7 +765,83 @@ return (
     );
   }
 
+getUserM(){
+  let users = this.state.users;
+  let por = [];
+  let times = [];
+  for(var i=0; i<users.length;i++){
+    let user = users[i].data;
+    if(user.weight && user.height){
+      let masa = user.weight/user.height;
+      if(por.length==0){
+        por.push(masa);
+        times.push(1);
+        continue;
+      }
+      else{
+        let encontro = false;
+        for(var j = 0; j<por.length && !encontro;j++){
+          if(por[j]==masa){
+            times[j]=times[j]+1;
+            encontro = true;
+          }
+          else if(j==por.length-1 && por[j]!=masa){
+            por.push(masa);
+            times.push(1);
+            encontro = true;
+          }
+        }
+      }
 
+    }
+  }
+  let pieT=[0,0,0,0,0];
+  let lab = ["0-0.25","0.25-0.5","0.5-0.75","0.75-1","1 or more"];
+  for(var i = 0;i<por.length;i++){
+    let x = por[i];
+    if(x>=1){
+      pieT[4]++;
+    }
+    else if(x>=0.75 && x<1){
+      pieT[3]++;
+    }
+    else if(x>=0.5 && x<0.75){
+      pieT[2]++;
+    }
+    else if(x>=0.25 && x<0.5){
+      pieT[1]++;
+    }
+    else {
+      pieT[0]++;
+    }
+  }
+
+  const massss = {
+    labels: lab,
+    datasets: [
+      {
+        data: pieT,
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#EE82EE", "#020326"]
+      }
+    ]
+  };
+  return(
+    <div>
+      <br />
+      <br />
+      <h2>Body Mass</h2>
+      <div className="chart">
+        <Pie
+          data={massss}
+          height={175}
+          options={{
+            maintainAspectRatio: false
+          }}
+        />
+      </div>
+      </div>
+  );
+}
 
   getAgeData() {
 
@@ -992,6 +1066,7 @@ for(var i = 0;i<users.length;i++)
           {this.getAgeData()}
           {this.getSymptomsData()}
           {this.getMeasuresData()}
+          {this.getUserM()}
         </div>
       );
     } else {
