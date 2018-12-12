@@ -796,19 +796,19 @@ getUserM(){
     }
   }
   let pieT=[0,0,0,0,0];
-  let lab = ["0-0.25","0.25-0.5","0.5-0.75","0.75-1","1 or more"];
+  let lab = ["0-18.5","18.5-24.9","25-29.9","30-39.9","40 or more"];
   for(var i = 0;i<por.length;i++){
     let x = por[i];
-    if(x>=1){
+    if(x>=40){
       pieT[4]++;
     }
-    else if(x>=0.75 && x<1){
+    else if(x>=30 && x<40){
       pieT[3]++;
     }
-    else if(x>=0.5 && x<0.75){
+    else if(x>=25 && x<30){
       pieT[2]++;
     }
-    else if(x>=0.25 && x<0.5){
+    else if(x>18.5 && x<25){
       pieT[1]++;
     }
     else {
